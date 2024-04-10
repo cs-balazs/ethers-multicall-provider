@@ -46,6 +46,7 @@ export class MulticallWrapper {
    */
   public static wrap<T extends AbstractProvider>(
     provider: T,
+    address?: { v2: string } | { v3: string },
     maxMulticallDataLength = 0,
     cache = true
   ): MulticallProvider<T> {
@@ -183,7 +184,7 @@ export class MulticallWrapper {
       const network = await this._detectNetwork();
 
       const blockNumber = getBlockNumber(blockTag);
-      const multicall = getMulticall(blockNumber, Number(network.chainId), provider);
+      const multicall = getMulticall(blockNumber, Number(network.chainId), provider, address);
 
       if (multicall == null) return _perform(req);
 

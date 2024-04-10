@@ -1,4 +1,5 @@
 import { BlockTag, ContractRunner, isHexString, toNumber } from "ethers";
+import { add } from "lodash";
 
 import {
   multicall2Address,
@@ -26,8 +27,25 @@ export const getBlockNumber = (blockTag: BlockTag) => {
 export const getMulticall = (
   blockNumber: number | null,
   chainId: number,
-  runner: ContractRunner
+  runner: ContractRunner,
+  addressToUse?: { v2: string } | { v3: string }
 ) => {
+  if (addressToUse && "v3" in addressToUse) {
+    return Multicall3__factory.connect(addressToUse.v3, runner);
+  }
+
+  if (multicall3DeploymentBlockNumbers[chainId]) {
+    // Check blockNumber?
+    return Multicall3__factory.connect(
+      multicall3ChainAddress[chainId] || multicall3Address,
+      runner
+    );
+  }
+
+  if (addressToUse && "v2" in addressToUse) {
+    return Multicall2__factory.connect(addressToUse.v2, runner);
+  }
+
   if (blockNumber != null) {
     if (blockNumber <= (multicall3DeploymentBlockNumbers[chainId] ?? Infinity)) {
       if (blockNumber <= (multicall2DeploymentBlockNumbers[chainId] ?? Infinity)) return null;
